@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Default deny — no public read/write
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Ebook PDFs — no public read. All access via signed URLs generated server-side.
+    match /ebooks/{fileName} {
+      allow read: if false;
+      allow write: if false;
+    }
+
+    // User uploads (if any in the future) — only authenticated owner
+    match /users/{userId}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId
+                   && request.resource.size < 5 * 1024 * 1024; // 5MB limit
+    }
+  }
+}

@@ -1,26 +1,181 @@
 @import "tailwindcss";
 
+/* ─── Design Tokens (ActsofFaith Media Light Theme Inspiration) ─── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg-deep: #fafaf7;
+  --color-bg-surface: #ffffff;
+  --color-bg-card: rgba(255, 255, 255, 0.95);
+  --color-text-primary: #1a1d20;
+  --color-text-secondary: #4a505a;
+  --color-text-muted: #767e8c;
+  --color-accent-warm: #c5a059;
+  --color-accent-gold: #d4af37;
+  --color-gold-light: #b38f38;
+  --color-accent-glow: rgba(197, 160, 89, 0.25);
+  --color-glass-bg: rgba(255, 255, 255, 0.85);
+  --color-glass-border-top: rgba(197, 160, 89, 0.35);
+  --color-glass-border-mid: rgba(197, 160, 89, 0.18);
+  --color-glass-border-none: rgba(197, 160, 89, 0);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--color-bg-deep);
+  --color-foreground: var(--color-text-primary);
+  --color-surface: var(--color-bg-surface);
+  --color-muted: var(--color-text-muted);
+  --color-secondary: var(--color-text-secondary);
+  --color-accent: var(--color-accent-warm);
+  --font-heading: var(--font-instrument-serif);
+  --font-body: var(--font-barlow);
+  --radius-DEFAULT: 9999px;
+  --radius-lg: 1.5rem;
+  --radius-card: 1.25rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Base ─── */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-deep);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(197, 160, 89, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(197, 160, 89, 0.05) 0%, transparent 35%);
+  color: var(--color-text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+::selection {
+  background: rgba(197, 160, 89, 0.25);
+  color: #1a1d20;
+}
+
+/* ─── Light Mode Glass & Cards ─── */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(197, 160, 89, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.liquid-glass-strong {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(197, 160, 89, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.hover-gold-glow:hover {
+  border-color: rgba(197, 160, 89, 0.7);
+  box-shadow: 0 12px 35px rgba(197, 160, 89, 0.15);
+}
+
+/* ─── Grace Gold Pill Buttons ─── */
+.btn-gold {
+  background: linear-gradient(135deg, #d4af37 0%, #c5a059 50%, #b38f38 100%);
+  color: #1a1d20;
+  font-weight: 600;
+  border-radius: 9999px;
+  box-shadow: 0 4px 18px rgba(197, 160, 89, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-gold:hover {
+
+  background: linear-gradient(135deg, #e5c158 0%, #d4af37 50%, #c5a059 100%);
+  box-shadow: 0 6px 25px rgba(197, 160, 89, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-outline-gold {
+  background: rgba(197, 160, 89, 0.06);
+  border: 1.5px solid rgba(197, 160, 89, 0.6);
+  color: #1a1d20;
+  font-weight: 600;
+  border-radius: 9999px;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-outline-gold:hover {
+  background: rgba(197, 160, 89, 0.15);
+  border-color: rgba(197, 160, 89, 0.9);
+  color: #000000;
+  box-shadow: 0 4px 18px rgba(197, 160, 89, 0.2);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #b38f38 0%, #c5a059 50%, #d4af37 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-shadow-gold {
+  text-shadow: 0 2px 12px rgba(197, 160, 89, 0.25);
+}
+
+/* ─── Typography Helpers ─── */
+.font-heading {
+  font-family: var(--font-heading), Georgia, serif;
+}
+
+.font-body {
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fafaf7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(197, 160, 89, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 160, 89, 0.6);
+}
+
+/* ─── Legal Policy Content Headings ─── */
+.legal-content h2 {
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 1.375rem;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1a1d20;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1.5px solid rgba(197, 160, 89, 0.3);
+}
+
+@media (min-width: 640px) {
+  .legal-content h2 {
+    font-size: 1.625rem;
+  }
+}
+
+.legal-content h3 {
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #1a1d20;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+
+
+

@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny — nothing is accessible unless explicitly opened below
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Ebooks — read-only for any authenticated user
+    match /ebooks/{ebookId} {
+      allow read: if request.auth != null;
+      allow write: if false; // admin-only, done via Admin SDK
+    }
+
+    // Orders — read only if the request email matches the order email
+    match /orders/{orderId} {
+      allow read: if request.auth != null
+                  && request.auth.token.email == resource.data.email;
+      allow write: if false; // server-only via Admin SDK
+    }
+
+    // Purchases — read only if the uid matches (legacy path and users subcollection path)
+    match /purchases/{uid}/items/{productId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == uid;
+      allow write: if false; // server-only via Admin SDK
+    }
+
+    match /users/{uid}/purchases/{ebookId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == uid;
+      allow write: if false; // server-only via Admin SDK
+    }
+
+    // Invoices — read only if the uid matches
+    match /users/{uid}/invoices/{invoiceId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == uid;
+      allow write: if false; // server-only via Admin SDK
+    }
+
+    // Subscriptions — read only if the uid matches
+    match /subscriptions/{uid} {
+      allow read: if request.auth != null
+                  && request.auth.uid == uid;
+      allow write: if false; // server-only via Admin SDK
+    }
+
+    // Blog posts — public read
+    match /blog-posts/{postId} {
+      allow read: if true;
+      allow write: if false; // admin-only
+    }
+
+    // Contact submissions — create only, no read
+    match /contact-submissions/{submissionId} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+  }
+}
