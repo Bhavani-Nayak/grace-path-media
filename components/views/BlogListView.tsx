@@ -55,6 +55,7 @@ export default function BlogListView({ posts, isLoading, error }: BlogListViewPr
                         src={post.coverUrl}
                         alt={post.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                         unoptimized
                       />

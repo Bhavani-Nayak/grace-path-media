@@ -169,8 +169,9 @@ export default function SupportView() {
                 src="/images/jesus-hero.png"
                 alt="Jesus Reaching Out Hand"
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
-                priority
+                preload
               />
 
               {/* Bottom-Right Floating Quote Overlay */}
