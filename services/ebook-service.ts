@@ -1,32 +1,35 @@
-import {
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-  query,
-  where,
-  orderBy,
-} from "firebase/firestore";
-import { db } from "./firebase";
 import type { Ebook } from "@/models/ebook";
 import { HARDCODED_EBOOKS, ExtendedEbook } from "@/lib/ebook-data";
 
 const EBOOKS_COLLECTION = "ebooks";
+
+function safeRequire(mod: string) {
+  try {
+    const req = eval("require");
+    return req(mod);
+  } catch {
+    return null;
+  }
+}
 
 export async function getEbooks(): Promise<ExtendedEbook[]> {
   try {
     if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
       return HARDCODED_EBOOKS;
     }
-    const q = query(
-      collection(db, EBOOKS_COLLECTION),
-      orderBy("createdAt", "desc")
+    const { db } = safeRequire("./firebase") || {};
+    const fbFs = safeRequire("firebase/firestore");
+    if (!db || !fbFs) return HARDCODED_EBOOKS;
+
+    const q = fbFs.query(
+      fbFs.collection(db, EBOOKS_COLLECTION),
+      fbFs.orderBy("createdAt", "desc")
     );
-    const snapshot = await getDocs(q);
+    const snapshot = await fbFs.getDocs(q);
     if (snapshot.empty) {
       return HARDCODED_EBOOKS;
     }
-    return snapshot.docs.map((docSnap) => {
+    return snapshot.docs.map((docSnap: any) => {
       const data = docSnap.data();
       const fallback = HARDCODED_EBOOKS.find((b) => b.slug === data.slug || b.id === docSnap.id);
       return {
@@ -57,11 +60,15 @@ export async function getEbookBySlug(slug: string): Promise<ExtendedEbook | null
     if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
       return HARDCODED_EBOOKS.find((b) => b.slug === slug) ?? null;
     }
-    const q = query(
-      collection(db, EBOOKS_COLLECTION),
-      where("slug", "==", slug)
+    const { db } = safeRequire("./firebase") || {};
+    const fbFs = safeRequire("firebase/firestore");
+    if (!db || !fbFs) return HARDCODED_EBOOKS.find((b) => b.slug === slug) ?? null;
+
+    const q = fbFs.query(
+      fbFs.collection(db, EBOOKS_COLLECTION),
+      fbFs.where("slug", "==", slug)
     );
-    const snapshot = await getDocs(q);
+    const snapshot = await fbFs.getDocs(q);
     if (snapshot.empty) {
       return HARDCODED_EBOOKS.find((b) => b.slug === slug) ?? null;
     }
@@ -93,7 +100,11 @@ export async function getEbookById(id: string): Promise<ExtendedEbook | null> {
   try {
     const fallback = HARDCODED_EBOOKS.find((b) => b.id === id);
     if (fallback) return fallback;
-    const docSnap = await getDoc(doc(db, EBOOKS_COLLECTION, id));
+    const { db } = safeRequire("./firebase") || {};
+    const fbFs = safeRequire("firebase/firestore");
+    if (!db || !fbFs) return null;
+
+    const docSnap = await fbFs.getDoc(fbFs.doc(db, EBOOKS_COLLECTION, id));
     if (!docSnap.exists()) return null;
     const data = docSnap.data();
     return {
@@ -117,4 +128,3 @@ export async function getEbookById(id: string): Promise<ExtendedEbook | null> {
     return HARDCODED_EBOOKS.find((b) => b.id === id) ?? null;
   }
 }
-

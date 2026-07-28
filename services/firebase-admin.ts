@@ -81,9 +81,11 @@ function createMockFirestore(): any {
 
 const mockDbInstance = createMockFirestore();
 
+// Dynamic string to prevent static analyzer / Turbopack string tracing
+const FB_ADMIN = ["firebase", "admin"].join("-");
+
 function safeRequire(moduleName: string): any {
   try {
-    // eval("require") bypasses Next.js / NFT static string analysis
     const req = eval("require");
     return req(moduleName);
   } catch {
@@ -94,7 +96,7 @@ function safeRequire(moduleName: string): any {
 function getAdminApp() {
   if (!isFirebaseAdminConfigured()) return null;
   try {
-    const adminApp = safeRequire("firebase-admin/app");
+    const adminApp = safeRequire(`${FB_ADMIN}/app`);
     if (!adminApp) return null;
 
     if (adminApp.getApps().length > 0) {
@@ -126,7 +128,7 @@ function getDbInstance(): any {
     try {
       const app = getAdminApp();
       if (app) {
-        const firestoreModule = safeRequire("firebase-admin/firestore");
+        const firestoreModule = safeRequire(`${FB_ADMIN}/firestore`);
         if (firestoreModule) {
           const realDb = firestoreModule.getFirestore(app);
           cachedDb = new Proxy(realDb, {
@@ -175,7 +177,7 @@ export const adminStorage = new Proxy({} as any, {
       if (isFirebaseAdminConfigured()) {
         const app = getAdminApp();
         if (app) {
-          const storageModule = safeRequire("firebase-admin/storage");
+          const storageModule = safeRequire(`${FB_ADMIN}/storage`);
           if (storageModule) {
             const storage = storageModule.getStorage(app);
             const value = Reflect.get(storage, prop);
@@ -196,7 +198,7 @@ export const adminAuth = new Proxy({} as any, {
       if (isFirebaseAdminConfigured()) {
         const app = getAdminApp();
         if (app) {
-          const authModule = safeRequire("firebase-admin/auth");
+          const authModule = safeRequire(`${FB_ADMIN}/auth`);
           if (authModule) {
             const auth = authModule.getAuth(app);
             const value = Reflect.get(auth, prop);

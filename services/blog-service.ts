@@ -1,31 +1,36 @@
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
-} from "firebase/firestore";
-import { db } from "./firebase";
 import type { BlogPost } from "@/models/blog-post";
 import { HARDCODED_BLOG_POSTS } from "@/lib/blog-data";
 
 const BLOG_COLLECTION = "blog-posts";
+
+function safeRequire(mod: string) {
+  try {
+    const req = eval("require");
+    return req(mod);
+  } catch {
+    return null;
+  }
+}
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
       return HARDCODED_BLOG_POSTS;
     }
-    const q = query(
-      collection(db, BLOG_COLLECTION),
-      where("isPublished", "==", true),
-      orderBy("publishedAt", "desc")
+    const { db } = safeRequire("./firebase") || {};
+    const fbFs = safeRequire("firebase/firestore");
+    if (!db || !fbFs) return HARDCODED_BLOG_POSTS;
+
+    const q = fbFs.query(
+      fbFs.collection(db, BLOG_COLLECTION),
+      fbFs.where("isPublished", "==", true),
+      fbFs.orderBy("publishedAt", "desc")
     );
-    const snapshot = await getDocs(q);
+    const snapshot = await fbFs.getDocs(q);
     if (snapshot.empty) {
       return HARDCODED_BLOG_POSTS;
     }
-    return snapshot.docs.map((docSnap) => {
+    return snapshot.docs.map((docSnap: any) => {
       const data = docSnap.data();
       return {
         id: docSnap.id,
@@ -53,12 +58,16 @@ export async function getBlogPostBySlug(
     if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
       return HARDCODED_BLOG_POSTS.find((p) => p.slug === slug) ?? null;
     }
-    const q = query(
-      collection(db, BLOG_COLLECTION),
-      where("slug", "==", slug),
-      where("isPublished", "==", true)
+    const { db } = safeRequire("./firebase") || {};
+    const fbFs = safeRequire("firebase/firestore");
+    if (!db || !fbFs) return HARDCODED_BLOG_POSTS.find((p) => p.slug === slug) ?? null;
+
+    const q = fbFs.query(
+      fbFs.collection(db, BLOG_COLLECTION),
+      fbFs.where("slug", "==", slug),
+      fbFs.where("isPublished", "==", true)
     );
-    const snapshot = await getDocs(q);
+    const snapshot = await fbFs.getDocs(q);
     if (snapshot.empty) {
       return HARDCODED_BLOG_POSTS.find((p) => p.slug === slug) ?? null;
     }
@@ -80,4 +89,3 @@ export async function getBlogPostBySlug(
     return HARDCODED_BLOG_POSTS.find((p) => p.slug === slug) ?? null;
   }
 }
-

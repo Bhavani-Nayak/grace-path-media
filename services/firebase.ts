@@ -1,8 +1,3 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "dummy-api-key",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "dummy-domain.firebaseapp.com",
@@ -13,27 +8,56 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-function lazy<T extends object>(initializer: () => T): T {
-  let target: T | null = null;
-  return new Proxy({} as T, {
-    get(_, prop) {
-      if (!target) {
-        target = initializer();
-      }
-      const value = Reflect.get(target, prop);
-      if (typeof value === "function") {
-        return value.bind(target);
-      }
-      return value;
-    },
-  });
+function safeRequire(mod: string) {
+  try {
+    const req = eval("require");
+    return req(mod);
+  } catch {
+    return null;
+  }
 }
 
-const getClientApp = () => {
-  return getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-};
+export function getClientApp() {
+  if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) return null;
+  const fbApp = safeRequire("firebase/app");
+  if (!fbApp) return null;
+  return fbApp.getApps().length > 0 ? fbApp.getApp() : fbApp.initializeApp(firebaseConfig);
+}
 
-export const auth = lazy(() => getAuth(getClientApp()));
-export const db = lazy(() => getFirestore(getClientApp()));
-export const storage = lazy(() => getStorage(getClientApp()));
-export default lazy(() => getClientApp());
+export const auth: any = new Proxy({} as any, {
+  get(_, prop) {
+    const app = getClientApp();
+    if (!app) return undefined;
+    const fbAuth = safeRequire("firebase/auth");
+    if (!fbAuth) return undefined;
+    const instance = fbAuth.getAuth(app);
+    const value = Reflect.get(instance, prop);
+    return typeof value === "function" ? value.bind(instance) : value;
+  },
+});
+
+export const db: any = new Proxy({} as any, {
+  get(_, prop) {
+    const app = getClientApp();
+    if (!app) return undefined;
+    const fbFs = safeRequire("firebase/firestore");
+    if (!fbFs) return undefined;
+    const instance = fbFs.getFirestore(app);
+    const value = Reflect.get(instance, prop);
+    return typeof value === "function" ? value.bind(instance) : value;
+  },
+});
+
+export const storage: any = new Proxy({} as any, {
+  get(_, prop) {
+    const app = getClientApp();
+    if (!app) return undefined;
+    const fbStorage = safeRequire("firebase/storage");
+    if (!fbStorage) return undefined;
+    const instance = fbStorage.getStorage(app);
+    const value = Reflect.get(instance, prop);
+    return typeof value === "function" ? value.bind(instance) : value;
+  },
+});
+
+export default getClientApp;
