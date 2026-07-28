@@ -81,22 +81,10 @@ function createMockFirestore(): any {
 
 const mockDbInstance = createMockFirestore();
 
-// Dynamic string to prevent static analyzer / Turbopack string tracing
-const FB_ADMIN = ["firebase", "admin"].join("-");
-
-function safeRequire(moduleName: string): any {
-  try {
-    const req = eval("require");
-    return req(moduleName);
-  } catch {
-    return null;
-  }
-}
-
-function getAdminApp() {
+function getAdminApp(): any {
   if (!isFirebaseAdminConfigured()) return null;
   try {
-    const adminApp = safeRequire(`${FB_ADMIN}/app`);
+    const adminApp = require("firebase-admin/app");
     if (!adminApp) return null;
 
     if (adminApp.getApps().length > 0) {
@@ -128,7 +116,7 @@ function getDbInstance(): any {
     try {
       const app = getAdminApp();
       if (app) {
-        const firestoreModule = safeRequire(`${FB_ADMIN}/firestore`);
+        const firestoreModule = require("firebase-admin/firestore");
         if (firestoreModule) {
           const realDb = firestoreModule.getFirestore(app);
           cachedDb = new Proxy(realDb, {
@@ -164,10 +152,10 @@ export const adminDb: any = new Proxy({} as any, {
   get(_, prop) {
     const db = getDbInstance();
     const value = Reflect.get(db, prop);
-    if (typeof value === "function") {
-      return value.bind(db);
+    if (typeof value !== "function") {
+      return value;
     }
-    return value;
+    return value.bind(db);
   },
 });
 
@@ -177,7 +165,7 @@ export const adminStorage = new Proxy({} as any, {
       if (isFirebaseAdminConfigured()) {
         const app = getAdminApp();
         if (app) {
-          const storageModule = safeRequire(`${FB_ADMIN}/storage`);
+          const storageModule = require("firebase-admin/storage");
           if (storageModule) {
             const storage = storageModule.getStorage(app);
             const value = Reflect.get(storage, prop);
@@ -198,7 +186,7 @@ export const adminAuth = new Proxy({} as any, {
       if (isFirebaseAdminConfigured()) {
         const app = getAdminApp();
         if (app) {
-          const authModule = safeRequire(`${FB_ADMIN}/auth`);
+          const authModule = require("firebase-admin/auth");
           if (authModule) {
             const auth = authModule.getAuth(app);
             const value = Reflect.get(auth, prop);
@@ -213,21 +201,4 @@ export const adminAuth = new Proxy({} as any, {
   },
 });
 
-export default lazyApp();
-
-function lazyApp() {
-  return new Proxy({} as any, {
-    get(_, prop) {
-      try {
-        const app = getAdminApp();
-        if (app) {
-          const value = Reflect.get(app, prop);
-          return typeof value === "function" ? value.bind(app) : value;
-        }
-        return {};
-      } catch {
-        return {};
-      }
-    },
-  });
-}
+export default mockDbInstance;

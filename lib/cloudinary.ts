@@ -19,8 +19,7 @@ export function isCloudinaryConfigured(): boolean {
 function getCloudinaryInstance(): any {
   if (!isCloudinaryConfigured()) return null;
   try {
-    const req = eval("require");
-    const c = req(["cloudi", "nary"].join("")).v2;
+    const c = require("cloudinary").v2;
     c.config({
       cloud_name: cloudName,
       api_key: apiKey,

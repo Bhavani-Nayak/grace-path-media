@@ -1,3 +1,8 @@
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "dummy-api-key",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "dummy-domain.firebaseapp.com",
@@ -8,56 +13,18 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-function safeRequire(mod: string) {
-  try {
-    const req = eval("require");
-    return req(mod);
-  } catch {
-    return null;
+let appInstance: FirebaseApp | null = null;
+
+export function getClientApp(): FirebaseApp {
+  if (!appInstance) {
+    appInstance = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   }
+  return appInstance;
 }
 
-export function getClientApp() {
-  if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) return null;
-  const fbApp = safeRequire("firebase/app");
-  if (!fbApp) return null;
-  return fbApp.getApps().length > 0 ? fbApp.getApp() : fbApp.initializeApp(firebaseConfig);
-}
-
-export const auth: any = new Proxy({} as any, {
-  get(_, prop) {
-    const app = getClientApp();
-    if (!app) return undefined;
-    const fbAuth = safeRequire("firebase/auth");
-    if (!fbAuth) return undefined;
-    const instance = fbAuth.getAuth(app);
-    const value = Reflect.get(instance, prop);
-    return typeof value === "function" ? value.bind(instance) : value;
-  },
-});
-
-export const db: any = new Proxy({} as any, {
-  get(_, prop) {
-    const app = getClientApp();
-    if (!app) return undefined;
-    const fbFs = safeRequire("firebase/firestore");
-    if (!fbFs) return undefined;
-    const instance = fbFs.getFirestore(app);
-    const value = Reflect.get(instance, prop);
-    return typeof value === "function" ? value.bind(instance) : value;
-  },
-});
-
-export const storage: any = new Proxy({} as any, {
-  get(_, prop) {
-    const app = getClientApp();
-    if (!app) return undefined;
-    const fbStorage = safeRequire("firebase/storage");
-    if (!fbStorage) return undefined;
-    const instance = fbStorage.getStorage(app);
-    const value = Reflect.get(instance, prop);
-    return typeof value === "function" ? value.bind(instance) : value;
-  },
-});
+export const app = getClientApp();
+export const auth: Auth = getAuth(app);
+export const db: Firestore = getFirestore(app);
+export const storage: FirebaseStorage = getStorage(app);
 
 export default getClientApp;
