@@ -1,13 +1,3 @@
-import {
-  initializeApp,
-  getApps,
-  cert,
-  type ServiceAccount,
-} from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
-import { getStorage } from "firebase-admin/storage";
-import { getAuth } from "firebase-admin/auth";
-
 export function isFirebaseAdminConfigured(): boolean {
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
@@ -91,31 +81,38 @@ function createMockFirestore(): any {
 
 const mockDbInstance = createMockFirestore();
 
+function safeRequire(moduleName: string): any {
+  try {
+    // eval("require") bypasses Next.js / NFT static string analysis
+    const req = eval("require");
+    return req(moduleName);
+  } catch {
+    return null;
+  }
+}
+
 function getAdminApp() {
-  if (getApps().length > 0) {
-    return getApps()[0];
-  }
+  if (!isFirebaseAdminConfigured()) return null;
+  try {
+    const adminApp = safeRequire("firebase-admin/app");
+    if (!adminApp) return null;
 
-  if (isFirebaseAdminConfigured()) {
-    try {
-      const serviceAccount: ServiceAccount = {
-        projectId: process.env.FIREBASE_ADMIN_PROJECT_ID!,
-        clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL!,
-        privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY!.replace(/\\n/g, "\n"),
-      };
-
-      return initializeApp({
-        credential: cert(serviceAccount),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      });
-    } catch (err) {
-      console.warn("Firebase Admin cert error, using dev in-memory store:", err);
+    if (adminApp.getApps().length > 0) {
+      return adminApp.getApps()[0];
     }
+    const serviceAccount = {
+      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID!,
+      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL!,
+      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY!.replace(/\\n/g, "\n"),
+    };
+    return adminApp.initializeApp({
+      credential: adminApp.cert(serviceAccount),
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    });
+  } catch (err) {
+    console.warn("Firebase Admin init skipped/unavailable:", err);
+    return null;
   }
-
-  return initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "demo-project",
-  });
 }
 
 let cachedDb: any = null;
@@ -127,34 +124,35 @@ function getDbInstance(): any {
 
   if (isFirebaseAdminConfigured()) {
     try {
-      const realDb = getFirestore(getAdminApp());
-      // Wrap the real Firestore in a proxy that catches unhandled async errors
-      cachedDb = new Proxy(realDb, {
-        get(target, prop) {
-          const value = Reflect.get(target, prop);
-          if (typeof value !== "function") return value;
-
-          // Wrap collection/doc calls to catch async Firestore errors
-          return (...args: any[]) => {
-            try {
-              const result = value.apply(target, args);
-              return result;
-            } catch (err) {
-              console.warn("Firestore sync error, falling back to mock:", err);
-              dbInitFailed = true;
-              cachedDb = null;
-              const mockValue = Reflect.get(mockDbInstance, prop);
-              return typeof mockValue === "function"
-                ? mockValue.apply(mockDbInstance, args)
-                : mockValue;
-            }
-          };
-        },
-      });
-      return cachedDb;
+      const app = getAdminApp();
+      if (app) {
+        const firestoreModule = safeRequire("firebase-admin/firestore");
+        if (firestoreModule) {
+          const realDb = firestoreModule.getFirestore(app);
+          cachedDb = new Proxy(realDb, {
+            get(target, prop) {
+              const value = Reflect.get(target, prop);
+              if (typeof value !== "function") return value;
+              return (...args: any[]) => {
+                try {
+                  return value.apply(target, args);
+                } catch (err) {
+                  console.warn("Firestore sync error, falling back to mock:", err);
+                  dbInitFailed = true;
+                  cachedDb = null;
+                  const mockValue = Reflect.get(mockDbInstance, prop);
+                  return typeof mockValue === "function"
+                    ? mockValue.apply(mockDbInstance, args)
+                    : mockValue;
+                }
+              };
+            },
+          });
+          return cachedDb;
+        }
+      }
     } catch {
       dbInitFailed = true;
-      return mockDbInstance;
     }
   }
   return mockDbInstance;
@@ -174,9 +172,18 @@ export const adminDb: any = new Proxy({} as any, {
 export const adminStorage = new Proxy({} as any, {
   get(_, prop) {
     try {
-      const storage = getStorage(getAdminApp());
-      const value = Reflect.get(storage, prop);
-      return typeof value === "function" ? value.bind(storage) : value;
+      if (isFirebaseAdminConfigured()) {
+        const app = getAdminApp();
+        if (app) {
+          const storageModule = safeRequire("firebase-admin/storage");
+          if (storageModule) {
+            const storage = storageModule.getStorage(app);
+            const value = Reflect.get(storage, prop);
+            return typeof value === "function" ? value.bind(storage) : value;
+          }
+        }
+      }
+      return {};
     } catch {
       return {};
     }
@@ -186,9 +193,18 @@ export const adminStorage = new Proxy({} as any, {
 export const adminAuth = new Proxy({} as any, {
   get(_, prop) {
     try {
-      const auth = getAuth(getAdminApp());
-      const value = Reflect.get(auth, prop);
-      return typeof value === "function" ? value.bind(auth) : value;
+      if (isFirebaseAdminConfigured()) {
+        const app = getAdminApp();
+        if (app) {
+          const authModule = safeRequire("firebase-admin/auth");
+          if (authModule) {
+            const auth = authModule.getAuth(app);
+            const value = Reflect.get(auth, prop);
+            return typeof value === "function" ? value.bind(auth) : value;
+          }
+        }
+      }
+      return {};
     } catch {
       return {};
     }
@@ -202,8 +218,11 @@ function lazyApp() {
     get(_, prop) {
       try {
         const app = getAdminApp();
-        const value = Reflect.get(app, prop);
-        return typeof value === "function" ? value.bind(app) : value;
+        if (app) {
+          const value = Reflect.get(app, prop);
+          return typeof value === "function" ? value.bind(app) : value;
+        }
+        return {};
       } catch {
         return {};
       }
