@@ -1,11 +1,11 @@
-import { jsPDF } from "jspdf";
 import type { InvoiceRecord } from "./invoice-service";
 
 /**
  * Generate a downloadable PDF invoice buffer from an InvoiceRecord.
  * Uses jsPDF for server-side PDF generation without browser dependency.
  */
-export function generateInvoicePdf(invoice: InvoiceRecord): Buffer {
+export async function generateInvoicePdf(invoice: InvoiceRecord): Promise<Buffer> {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;

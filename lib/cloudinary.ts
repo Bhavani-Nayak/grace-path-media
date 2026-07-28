@@ -1,18 +1,6 @@
-import { v2 as cloudinary } from "cloudinary";
-
-/**
- * Configure Cloudinary SDK instance with server-side environment credentials.
- */
 const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
 const apiKey = process.env.CLOUDINARY_API_KEY || "";
 const apiSecret = process.env.CLOUDINARY_API_SECRET || "";
-
-cloudinary.config({
-  cloud_name: cloudName,
-  api_key: apiKey,
-  api_secret: apiSecret,
-  secure: true,
-});
 
 /**
  * Check if Cloudinary is fully configured with valid environment variables.
@@ -28,6 +16,24 @@ export function isCloudinaryConfigured(): boolean {
   );
 }
 
+function getCloudinaryInstance(): any {
+  if (!isCloudinaryConfigured()) return null;
+  try {
+    const req = eval("require");
+    const c = req("cloudinary").v2;
+    c.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true,
+    });
+    return c;
+  } catch (err) {
+    console.warn("Cloudinary module load skipped/unavailable:", err);
+    return null;
+  }
+}
+
 export interface CloudinaryDownloadOptions {
   resourceType?: "image" | "raw" | "video" | "auto";
   attachment?: boolean | string;
@@ -38,17 +44,15 @@ export interface CloudinaryDownloadOptions {
 
 /**
  * Generate a time-limited signed Cloudinary download URL for a PDF file asset.
- *
- * IMPORTANT: PDFs uploaded via the Cloudinary Media Library UI are stored with
- * resource_type "image" (NOT "raw"). We must use resource_type "image" and
- * format "pdf" to generate a valid download URL.
  */
 export function generateCloudinaryDownloadUrl(
   publicId: string,
   options: CloudinaryDownloadOptions = {}
 ): string {
+  const cloudinary = getCloudinaryInstance();
+  if (!cloudinary) return "";
+
   const {
-    // PDFs uploaded via Cloudinary dashboard are stored as "image" type
     resourceType = "image",
     attachment = true,
     expiresInMinutes = 30,
@@ -59,9 +63,6 @@ export function generateCloudinaryDownloadUrl(
   const cleanPublicId = publicId.replace(/^\//, "").replace(/\.pdf$/i, "");
   const expiresAt = Math.floor(Date.now() / 1000) + expiresInMinutes * 60;
 
-  // Generate Cloudinary's official signed private download API URL
-  // This works even when "Blocked for delivery" is set, because it uses
-  // the authenticated API endpoint rather than the CDN delivery URL.
   try {
     const privateUrl = cloudinary.utils.private_download_url(
       cleanPublicId,
@@ -80,7 +81,6 @@ export function generateCloudinaryDownloadUrl(
     console.warn("Cloudinary private_download_url warning:", err);
   }
 
-  // Fallback: Standard signed Cloudinary CDN URL with .pdf extension
   const signedUrl = cloudinary.url(`${cleanPublicId}.${format}`, {
     resource_type: resourceType,
     type,
@@ -99,6 +99,9 @@ export function getCloudinaryUrl(
   publicId: string,
   options: { resourceType?: "image" | "raw" | "video"; format?: string } = {}
 ): string {
+  const cloudinary = getCloudinaryInstance();
+  if (!cloudinary) return "";
+
   const { resourceType = "image", format } = options;
   return cloudinary.url(publicId, {
     resource_type: resourceType,
@@ -106,5 +109,3 @@ export function getCloudinaryUrl(
     secure: true,
   });
 }
-
-export { cloudinary };

@@ -26,7 +26,7 @@ export async function GET(
 
     // ─── PDF format ───
     if (format === "pdf") {
-      const pdfBuffer = generateInvoicePdf(invoice);
+      const pdfBuffer = await generateInvoicePdf(invoice);
       return new NextResponse(new Uint8Array(pdfBuffer), {
         headers: {
           "Content-Type": "application/pdf",
