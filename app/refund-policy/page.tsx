@@ -14,8 +14,7 @@ const content = `
   </p>
 </div>
 
-<h2>1. Instant Digital Delivery</h2>
-<p>When you purchase an eBook on Grace Path Media, you get instant access to download your PDF book right after checkout and from your account library anytime.</p>
+<p>When you purchase an eBook on Grace Path Media, you get instant access to download your PDF book right after checkout.</p>
 
 <h2>2. How Refunds Work</h2>
 <p>Because digital eBooks can be downloaded immediately to your device, purchases are generally non-refundable once the file has been delivered.</p>

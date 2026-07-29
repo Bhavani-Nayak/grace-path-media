@@ -67,17 +67,6 @@ export default function ThankYouView({
               </a>
             )}
 
-            {/* Lifetime Printable & PDF Invoice Links */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <a
-                href="/account/downloads"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border border-[#c5a059]/60 text-[#1a1d20] bg-white hover:bg-[#FAF5E8] transition-colors shadow-xs w-full sm:w-auto"
-              >
-                <FileText size={15} className="text-[#c5a059]" />
-                View Lifetime Invoice & Library
-              </a>
-            </div>
-
             <div className="pt-4 border-t border-black/5 flex items-center justify-center gap-4">
               <Button href="/ebooks" variant="gold-outline" size="sm">
                 ← Back to Catalog

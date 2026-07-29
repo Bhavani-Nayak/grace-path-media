@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Menu, X, User as UserIcon, LogOut, HeartHandshake } from "lucide-react";
-import { onAuthStateChange, signOut } from "@/services/auth-service";
-import type { User } from "firebase/auth";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { Menu, X, HeartHandshake, LogIn } from "lucide-react";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -18,21 +16,7 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChange((u) => {
-      setUser(u);
-    });
-    return unsubscribe;
-  }, []);
-
-  const handleSignOut = async () => {
-    await signOut();
-    router.push("/");
-  };
 
   return (
     <nav className="fixed top-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-6xl -translate-x-1/2">
@@ -74,8 +58,17 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* CTA & User controls */}
+        {/* CTA */}
         <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/login"
+            id="nav-login"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-semibold border border-[#c5a059]/50 text-[#1a1d20] bg-white/80 hover:bg-[#c5a059]/15 hover:border-[#c5a059] transition-all shadow-xs"
+          >
+            <LogIn size={15} className="text-[#c5a059]" />
+            <span>Sign In</span>
+          </Link>
+
           <Link
             href="/support"
             id="nav-support-now"
@@ -84,39 +77,6 @@ export default function Navbar() {
             <HeartHandshake size={15} />
             <span>Support Our Mission</span>
           </Link>
-
-
-          {user ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/account/downloads"
-                id="nav-user-account"
-                className="btn-outline-gold text-xs sm:text-sm px-4 py-2 hidden sm:inline-flex items-center gap-2"
-              >
-                <UserIcon size={15} className="text-[#c5a059]" />
-                <span className="max-w-[100px] truncate">{user.email?.split("@")[0] || "Account"}</span>
-              </Link>
-
-              <button
-                type="button"
-                onClick={handleSignOut}
-                aria-label="Sign out"
-                id="nav-sign-out"
-                className="p-2 rounded-full text-[var(--color-text-secondary)] hover:text-red-600 hover:bg-red-50 border border-black/5 transition-all duration-300"
-                title="Sign Out"
-              >
-                <LogOut size={16} />
-              </button>
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              id="nav-sign-in"
-              className="btn-outline-gold text-xs sm:text-sm px-4 py-2 hidden sm:inline-flex"
-            >
-              Sign In
-            </Link>
-          )}
 
           {/* Mobile menu toggle */}
           <button
@@ -150,6 +110,15 @@ export default function Navbar() {
 
           <div className="pt-2 border-t border-black/10 flex flex-col gap-2">
             <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold border border-[#c5a059]/40 text-[#1a1d20] bg-white hover:bg-[#c5a059]/10 transition-colors"
+            >
+              <LogIn size={16} className="text-[#c5a059]" />
+              <span>Sign In / Sign Up</span>
+            </Link>
+
+            <Link
               href="/support"
               onClick={() => setMobileOpen(false)}
               className="btn-gold text-center py-2.5 text-sm font-semibold flex items-center justify-center gap-2"
@@ -157,41 +126,12 @@ export default function Navbar() {
               <HeartHandshake size={16} />
               Support Our Mission
             </Link>
-
-            {user ? (
-              <>
-                <Link
-                  href="/account/downloads"
-                  onClick={() => setMobileOpen(false)}
-                  className="block px-4 py-2.5 rounded-xl text-sm font-medium text-[#1a1d20] border border-[#c5a059]/30 text-center bg-[#c5a059]/10"
-                >
-                  My Account ({user.email})
-                </Link>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    setMobileOpen(false);
-                    await handleSignOut();
-                  }}
-                  className="w-full text-center px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="btn-outline-gold text-center py-2.5 text-sm font-medium"
-              >
-                Sign In →
-              </Link>
-            )}
           </div>
         </div>
       )}
     </nav>
   );
 }
+
 
 

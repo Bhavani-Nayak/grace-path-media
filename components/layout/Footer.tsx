@@ -11,7 +11,7 @@ const footerLinks = {
   ],
   support: [
     { label: "Support Our Mission", href: "/support" },
-    { label: "My Downloads & Account", href: "/account/downloads" },
+    { label: "Sign In / Sign Up", href: "/login" },
   ],
 
   legal: [
@@ -101,10 +101,10 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Account & Giving Column */}
+          {/* Support Column */}
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#c5a059] mb-4">
-              Account & Support
+              Support
             </h3>
             <ul className="space-y-2.5">
               {footerLinks.support.map((link) => (

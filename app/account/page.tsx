@@ -7,8 +7,9 @@ export default function AccountPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/account/downloads");
+    router.replace("/");
   }, [router]);
 
   return null;
 }
+

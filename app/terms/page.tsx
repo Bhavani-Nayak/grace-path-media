@@ -31,8 +31,7 @@ const content = `
   </p>
 </div>
 
-<h2>4. Digital Deliveries & Instant Access</h2>
-<p>All eBook purchases are delivered digitally right after checkout and remain accessible anytime through your account download library.</p>
+<p>All eBook purchases are delivered digitally right after checkout.</p>
 <p>For products offered under "Pay As You Want", you have the freedom to choose your desired purchase amount.</p>
 
 <h2>5. Support Our Mission Program</h2>

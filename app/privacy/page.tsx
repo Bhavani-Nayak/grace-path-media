@@ -20,14 +20,8 @@ const content = `
 <h2>2. Information You Share With Us</h2>
 <p>You may choose to share information with us in a few simple ways:</p>
 
-<h3>Account & Sign-In Details</h3>
-<p>When you sign in to access your purchased eBooks or account library, we receive basic profile details such as your name and email address to link your purchases to your account.</p>
-
 <h3>Messages & Contact Requests</h3>
-<p>If you contact us through our website or send a prayer request, we receive your name, email address, and message so that our team can respond to you.</p>
-
-<h3>Purchase & Download History</h3>
-<p>When you purchase an eBook, we keep a record of the items you bought so you can re-download them anytime from your account library.</p>
+<p>If you contact us through our website or send a message, we receive your name, email address, and message so that our team can respond to you.</p>
 
 <h2>3. How We Protect Payment Security</h2>
 <p>All payments and voluntary mission contributions are processed through secure, industry-standard payment providers like PayPal.</p>
@@ -37,19 +31,17 @@ const content = `
 <p>Your information is used strictly to serve you:</p>
 <ul>
   <li>To deliver your purchased digital eBooks and send order receipts.</li>
-  <li>To allow you to log in and access your saved library of downloads.</li>
-  <li>To reply to your questions, prayer requests, and feedback.</li>
+  <li>To reply to your questions and feedback.</li>
   <li>To maintain website security and prevent fraud.</li>
 </ul>
 
 <h2>5. Website Cookies & Preferences</h2>
-<p>We use standard, simple website cookies to remember your sign-in session and keep the website running smoothly. You can disable cookies in your web browser at any time, though some account features may require them to function properly.</p>
+<p>We use standard, simple website cookies to keep the website running smoothly. You can disable cookies in your web browser at any time.</p>
 
 <h2>6. Your Privacy Rights & Choices</h2>
 <p>You have full control over your personal information:</p>
 <ul>
-  <li><strong>View Your Data:</strong> You can view your saved purchases anytime by logging into your account.</li>
-  <li><strong>Update or Delete:</strong> You may request to update your details or ask us to delete your account and personal records at any time.</li>
+  <li><strong>Update or Delete:</strong> You may request to update your details or ask us to delete your records at any time.</li>
   <li><strong>Unsubscribe:</strong> You can unsubscribe from optional email updates whenever you choose.</li>
 </ul>
 

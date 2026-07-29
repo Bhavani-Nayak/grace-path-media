@@ -1,18 +1,15 @@
 "use client";
 
-import { useDownloadsViewModel } from "@/viewmodels/useDownloadsViewModel";
-import { useAuthViewModel } from "@/viewmodels/useAuthViewModel";
-import DownloadsView from "@/components/views/DownloadsView";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DownloadsPage() {
-  const downloadsVm = useDownloadsViewModel();
-  const authVm = useAuthViewModel();
+  const router = useRouter();
 
-  return (
-    <DownloadsView
-      {...downloadsVm}
-      signOut={authVm.signOut}
-      deleteAccount={authVm.deleteAccount}
-    />
-  );
+  useEffect(() => {
+    router.replace("/ebooks");
+  }, [router]);
+
+  return null;
 }
+

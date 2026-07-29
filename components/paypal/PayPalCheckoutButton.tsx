@@ -76,7 +76,7 @@ export default function PayPalCheckoutButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderId: data.orderID,
-          uid: user?.uid || null,
+          uid: user?.uid ?? "guest",
         }),
       });
 
@@ -87,11 +87,11 @@ export default function PayPalCheckoutButton({
 
       const captureData = await res.json();
       
-      // Redirect to success page or download page
+      // Redirect to success/thank-you page
       if (successRedirect) {
         router.push(`${successRedirect}?token=${encodeURIComponent(captureData.orderId)}`);
       } else {
-        router.push(`/ebooks/${productSlug}/download?token=${encodeURIComponent(captureData.orderId)}`);
+        router.push(`/thank-you?token=${encodeURIComponent(captureData.orderId)}`);
       }
     } catch (err: any) {
       setIsProcessing(false);
@@ -108,77 +108,46 @@ export default function PayPalCheckoutButton({
         </div>
       )}
 
-      {!user ? (
-        <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-xl space-y-3 text-left">
-          <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
-            <ShieldCheck size={16} className="text-[#c5a059]" />
-            Account Sign-In Required for eBook Ownership
-          </div>
-          <p className="text-xs text-amber-800 leading-relaxed">
-            Please sign in with Google so your purchase and invoice can be securely linked to your account.
-          </p>
+      <div className="space-y-3">
+        {paypalClientId !== "test" ? (
+          <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD" }}>
+            <PayPalButtons
+              style={{ layout: "vertical", shape: "rect", label: "pay" }}
+              createOrder={handleCreateOrder}
+              onApprove={handleApprove}
+              onError={(err) => {
+                console.error("PayPal Error:", err);
+                setErrorMessage("PayPal checkout error. Please try again.");
+              }}
+            />
+          </PayPalScriptProvider>
+        ) : (
+          // Sandbox/Dev mode button
           <Button
             onClick={async () => {
+              setIsProcessing(true);
               try {
-                await signInWithGoogle();
-              } catch (e: any) {
-                setErrorMessage(e.message);
+                const orderId = await handleCreateOrder();
+                await handleApprove({ orderID: orderId });
+              } catch (e) {
+                setIsProcessing(false);
               }
             }}
+            disabled={isProcessing}
             variant="gold"
-            size="sm"
-            className="w-full gap-2 text-sm py-2.5 font-bold"
+            size="lg"
+            className="w-full gap-2 py-4 font-bold shadow-lg"
           >
-            <LogIn size={16} />
-            Sign In with Google to Purchase
+            <ShoppingBag size={20} />
+            {isProcessing ? "Processing..." : "Buy Now"}
           </Button>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs text-slate-600 px-1 font-medium">
-            <span>Signed in as: <strong className="text-slate-900">{user.email}</strong></span>
-            <span className="text-[#c5a059] font-bold">UID Linked ✓</span>
-          </div>
+        )}
 
-          {paypalClientId !== "test" ? (
-            <PayPalScriptProvider options={{ clientId: paypalClientId, currency: "USD" }}>
-              <PayPalButtons
-                style={{ layout: "vertical", shape: "rect", label: "pay" }}
-                createOrder={handleCreateOrder}
-                onApprove={handleApprove}
-                onError={(err) => {
-                  console.error("PayPal Error:", err);
-                  setErrorMessage("PayPal checkout error. Please try again.");
-                }}
-              />
-            </PayPalScriptProvider>
-          ) : (
-            // Sandbox/Dev mode button
-            <Button
-              onClick={async () => {
-                setIsProcessing(true);
-                try {
-                  const orderId = await handleCreateOrder();
-                  await handleApprove({ orderID: orderId });
-                } catch (e) {
-                  setIsProcessing(false);
-                }
-              }}
-              disabled={isProcessing}
-              variant="gold"
-              size="lg"
-              className="w-full gap-2 py-4 font-bold shadow-lg"
-            >
-              <ShoppingBag size={20} />
-              {isProcessing ? "Processing Sandbox Payment..." : "Complete Sandbox PayPal Purchase"}
-            </Button>
-          )}
-
-          <p className="text-[11px] text-[var(--color-text-muted)] text-center">
-            🔒 Instant eBook delivery. Order details & invoice saved directly to your account.
-          </p>
-        </div>
-      )}
+        <p className="text-[11px] text-[var(--color-text-muted)] text-center">
+          🔒 Instant eBook delivery.
+        </p>
+      </div>
     </div>
   );
 }
+

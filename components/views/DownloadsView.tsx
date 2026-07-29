@@ -68,24 +68,7 @@ export default function DownloadsView({
     }
   };
 
-  if (!user) {
-    return (
-      <PageWrapper>
-        <div className="max-w-2xl mx-auto px-6 py-32 text-center space-y-4">
-          <Badge variant="gold">My Account</Badge>
-          <h1 className="font-heading text-4xl sm:text-5xl font-bold text-[#1a1d20]">
-            My Downloads & Library
-          </h1>
-          <p className="text-[var(--color-text-secondary)] font-normal">
-            Sign in to access your purchased ebooks and account settings.
-          </p>
-          <Button href="/login" variant="gold" size="lg">
-            Sign In Now
-          </Button>
-        </div>
-      </PageWrapper>
-    );
-  }
+
 
   return (
     <PageWrapper>
@@ -99,7 +82,7 @@ export default function DownloadsView({
             </h1>
             <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] font-medium">
               <UserIcon size={16} className="text-[#c5a059]" />
-              <span>{user.email || user.displayName || "Authenticated User"}</span>
+              <span>{user?.email || user?.displayName || "Member"}</span>
             </div>
           </div>
 
@@ -208,28 +191,6 @@ export default function DownloadsView({
                     </>
                   )}
                 </Button>
-
-                {/* Lifetime Invoice View & Download Buttons */}
-                <a
-                  href={`/api/invoices/${item.productId}?uid=${user.uid}&format=html`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold border border-[#c5a059]/60 text-[#1a1d20] bg-white hover:bg-[#FAF5E8] transition-colors shadow-xs"
-                >
-                  <FileText size={14} className="text-[#c5a059]" />
-                  View Invoice
-                </a>
-
-                <a
-                  href={`/api/invoices/${item.productId}?uid=${user.uid}&format=pdf`}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold border border-[#c5a059]/60 text-[#1a1d20] bg-white hover:bg-[#FAF5E8] transition-colors shadow-xs"
-                >
-                  <Download size={14} className="text-[#c5a059]" />
-                  Invoice PDF
-                </a>
               </div>
             </GlassCard>
           ))}

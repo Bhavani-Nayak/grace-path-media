@@ -7,7 +7,7 @@ import { generateInvoiceForOrder } from "@/services/invoice-service";
 
 const bodySchema = z.object({
   orderId: z.string().min(1, "orderId is required"),
-  uid: z.string().optional(), // present if buyer was signed in
+  uid: z.string().nullable().optional(), // present if buyer was signed in
 });
 
 export async function POST(request: Request) {

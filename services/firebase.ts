@@ -1,3 +1,4 @@
+/* FIREBASE DISABLED FOR STATIC SITE MODE
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
@@ -26,5 +27,16 @@ export const app = getClientApp();
 export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);
 export const storage: FirebaseStorage = getStorage(app);
+*/
+
+export function getClientApp(): any {
+  return null;
+}
+
+export const app: any = null;
+export const auth: any = null;
+export const db: any = null;
+export const storage: any = null;
 
 export default getClientApp;
+

@@ -1,4 +1,3 @@
-import { adminDb } from "./firebase-admin";
 import { HARDCODED_EBOOKS } from "@/lib/ebook-data";
 
 export interface InvoiceItem {
@@ -23,8 +22,8 @@ export interface InvoiceRecord {
 }
 
 /**
- * Generate and store an invoice for a completed order.
- * Stores in Firestore under users/{uid}/invoices/{invoiceId} and top-level invoices collection.
+ * Generate an invoice record (Static Site Mode).
+ * (Firestore saving commented out)
  */
 export async function generateInvoiceForOrder(params: {
   paypalOrderId: string;
@@ -35,14 +34,11 @@ export async function generateInvoiceForOrder(params: {
   currency?: string;
 }): Promise<InvoiceRecord> {
   const { paypalOrderId, uid, customerEmail = "customer@gracepathmedia.com", productId, amount, currency = "USD" } = params;
-
   const invoiceNumber = `INV-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
-  
-  // Find product details
   const matchedEbook = HARDCODED_EBOOKS.find((b) => b.id === productId || b.slug === productId);
   const title = matchedEbook?.title ?? "Grace Path Media Digital eBook";
 
-  const invoiceData: InvoiceRecord = {
+  return {
     invoiceNumber,
     orderId: paypalOrderId,
     uid: uid || "guest",
@@ -62,75 +58,16 @@ export async function generateInvoiceForOrder(params: {
     status: "PAID",
     createdAt: new Date(),
   };
-
-  try {
-    if (uid && uid !== "guest") {
-      await adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("invoices")
-        .doc(invoiceNumber)
-        .set(invoiceData, { merge: true });
-    }
-
-    await adminDb
-      .collection("invoices")
-      .doc(invoiceNumber)
-      .set(invoiceData, { merge: true });
-
-    await adminDb
-      .collection("invoices_by_order")
-      .doc(paypalOrderId)
-      .set({ invoiceNumber, uid }, { merge: true });
-  } catch (err) {
-    console.warn("Firestore invoice save notice:", err);
-  }
-
-  return invoiceData;
 }
 
 /**
- * Retrieve invoice by invoice number, order ID, product ID, or user UID.
- * Fallback guarantees lifetime view & download for all purchases.
+ * Retrieve invoice by invoice number (Static Site Mode).
+ * (Firestore queries commented out)
  */
 export async function getInvoice(
   uid: string,
   invoiceNumberOrId: string
 ): Promise<InvoiceRecord | null> {
-  try {
-    // 1. Try user invoices collection
-    if (uid && uid !== "guest") {
-      const userSnap = await adminDb
-        .collection("users")
-        .doc(uid)
-        .collection("invoices")
-        .doc(invoiceNumberOrId)
-        .get();
-
-      if (userSnap.exists) {
-        const data = userSnap.data();
-        if (data) return mapDocToInvoice(userSnap.id, data);
-      }
-    }
-
-    // 2. Try global invoices collection
-    const globalSnap = await adminDb.collection("invoices").doc(invoiceNumberOrId).get();
-    if (globalSnap.exists) {
-      const data = globalSnap.data();
-      if (data) return mapDocToInvoice(globalSnap.id, data);
-    }
-
-    // 3. Try lookup by order ID
-    const orderSnap = await adminDb.collection("invoices_by_order").doc(invoiceNumberOrId).get();
-    if (orderSnap.exists) {
-      const { invoiceNumber: invNum, uid: invUid } = orderSnap.data() as { invoiceNumber: string; uid: string };
-      if (invNum) return getInvoice(invUid || uid, invNum);
-    }
-  } catch (err) {
-    console.warn("Firestore invoice fetch notice:", err);
-  }
-
-  // 4. Lifetime fallback: match invoiceNumberOrId to known catalog eBook
   const matchedEbook = HARDCODED_EBOOKS.find(
     (b) => b.id === invoiceNumberOrId || b.slug === invoiceNumberOrId
   );
@@ -162,28 +99,9 @@ export async function getInvoice(
   return null;
 }
 
-/**
- * Get invoice by PayPal Order ID
- */
 export async function getInvoiceByOrderId(
   orderId: string
 ): Promise<InvoiceRecord | null> {
   return getInvoice("guest", orderId);
 }
 
-function mapDocToInvoice(id: string, data: Record<string, any>): InvoiceRecord {
-  return {
-    invoiceNumber: id,
-    orderId: data.orderId || id,
-    uid: data.uid || "guest",
-    customerEmail: data.customerEmail || "customer@gracepathmedia.com",
-    items: data.items ?? [],
-    subtotal: data.subtotal || data.totalAmount || 0,
-    tax: data.tax || 0,
-    totalAmount: data.totalAmount || 0,
-    currency: data.currency || "USD",
-    paymentMethod: data.paymentMethod || "PayPal",
-    status: data.status || "PAID",
-    createdAt: data.createdAt?.toDate?.() ?? new Date(data.createdAt || Date.now()),
-  };
-}
