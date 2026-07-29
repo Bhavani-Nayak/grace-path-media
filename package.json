@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "opennextjs-cloudflare build",
+    "build:next": "next build",
     "postinstall": "node scripts/patch-next.js",
     "cf-build": "node scripts/patch-next.js && opennextjs-cloudflare build",
     "dev": "next dev",
