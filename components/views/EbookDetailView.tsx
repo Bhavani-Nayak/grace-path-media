@@ -3,24 +3,28 @@
 import { useState } from "react";
 import PageWrapper from "@/components/layout/PageWrapper";
 import GlassCard from "@/components/ui/GlassCard";
-import Badge from "@/components/ui/Badge";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowLeft,
-  BookOpen,
-  Clock,
-  FileText,
-  Download,
-  ShieldCheck,
-  Sparkles,
+  CheckSquare,
+  Zap,
+  Lock,
+  Shield,
   ChevronLeft,
   ChevronRight,
-  Eye,
   Maximize2,
   X,
+  Tablet,
+  Laptop,
+  BookOpen,
+  Smartphone,
+  Printer,
+  Download,
+  FileText,
+  Sparkles,
 } from "lucide-react";
 import type { Ebook } from "@/models/ebook";
 import type { User } from "firebase/auth";
@@ -96,7 +100,7 @@ export default function EbookDetailView({
 
   return (
     <PageWrapper>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 space-y-8">
         <Link
           href="/ebooks"
           className="inline-flex items-center gap-2 text-xs font-bold text-[#c5a059] uppercase tracking-wider hover:underline"
@@ -105,13 +109,13 @@ export default function EbookDetailView({
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Left Column: Interactive Main Image Display + Thumbnail Strip Underneath */}
-          <div className="lg:col-span-5 space-y-4 flex flex-col items-center">
+          {/* Left Column: Interactive Main Image Display + Thumbnails + Works On Section */}
+          <div className="lg:col-span-5 space-y-5 flex flex-col items-center">
             {/* Main Cover / Screenshot Card */}
-            <GlassCard className="p-3.5 border border-[#c5a059]/30 bg-white shadow-2xl rounded-3xl w-full max-w-md relative group">
+            <div className="p-4 border border-black/10 bg-white shadow-xl rounded-2xl w-full max-w-md relative group">
               <div
                 onClick={() => setIsLightboxOpen(true)}
-                className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden bg-slate-50 border border-black/5 shadow-md cursor-pointer"
+                className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-slate-50 border border-black/5 shadow-inner cursor-pointer"
                 title="Click to expand full screen preview"
               >
                 {currentItem.url ? (
@@ -139,16 +143,16 @@ export default function EbookDetailView({
                   </span>
                 </div>
               </div>
-            </GlassCard>
+            </div>
 
-            {/* Thumbnail Selector Carousel Strip (Matches user screenshot) */}
+            {/* Thumbnail Strip */}
             {galleryItems.length > 1 && (
               <div className="w-full max-w-md space-y-2">
                 <div className="flex items-center justify-center gap-2">
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="p-1.5 rounded-full border border-[#c5a059]/40 bg-white text-[#1a1d20] hover:bg-[#c5a059] hover:text-white transition-all shadow-sm shrink-0"
+                    className="p-1.5 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-[#c5a059] hover:text-white transition-all shadow-xs shrink-0 cursor-pointer"
                     aria-label="Previous sample image"
                   >
                     <ChevronLeft size={16} />
@@ -162,10 +166,10 @@ export default function EbookDetailView({
                           key={item.url + idx}
                           type="button"
                           onClick={() => setSelectedImageIndex(idx)}
-                          className={`relative h-20 w-15 sm:h-22 sm:w-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 bg-slate-100 shadow-sm ${
+                          className={`relative h-20 w-16 rounded-lg overflow-hidden border-2 transition-all shrink-0 bg-slate-100 shadow-xs cursor-pointer ${
                             isSelected
-                              ? "border-[#c5a059] ring-2 ring-[#c5a059]/40 scale-105"
-                              : "border-black/10 opacity-70 hover:opacity-100 hover:border-[#c5a059]/50"
+                              ? "border-[#3b82f6] ring-2 ring-[#3b82f6]/30 scale-105"
+                              : "border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-400"
                           }`}
                         >
                           <Image
@@ -176,9 +180,6 @@ export default function EbookDetailView({
                             className="object-cover"
                             unoptimized
                           />
-                          <span className="absolute bottom-0 inset-x-0 bg-black/70 text-[9px] font-bold text-white text-center py-0.5 truncate">
-                            {item.label}
-                          </span>
                         </button>
                       );
                     })}
@@ -187,80 +188,145 @@ export default function EbookDetailView({
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="p-1.5 rounded-full border border-[#c5a059]/40 bg-white text-[#1a1d20] hover:bg-[#c5a059] hover:text-white transition-all shadow-sm shrink-0"
+                    className="p-1.5 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-[#c5a059] hover:text-white transition-all shadow-xs shrink-0 cursor-pointer"
                     aria-label="Next sample image"
                   >
                     <ChevronRight size={16} />
                   </button>
                 </div>
-
-                <p className="text-center text-xs font-semibold text-[var(--color-text-secondary)] flex items-center justify-center gap-1.5 pt-1">
-                  <Eye size={14} className="text-[#c5a059]" />
-                  <span>
-                    Preview {galleryItems.length} sample pages (Click image to expand)
-                  </span>
-                </p>
               </div>
             )}
+
+            {/* Works On Device Bar (Matches User Screenshot) */}
+            <div className="w-full max-w-md bg-[#fafaf8] border border-slate-200/80 rounded-xl p-4 space-y-2 text-center shadow-xs">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <BookOpen size={14} className="text-slate-600" />
+                <span>Works On</span>
+              </div>
+              <div className="flex items-center justify-center gap-4 text-slate-500 pt-1">
+                <div className="flex flex-col items-center gap-1" title="Tablet">
+                  <Tablet size={22} className="text-purple-600" />
+                </div>
+                <div className="flex flex-col items-center gap-1" title="Laptop">
+                  <Laptop size={22} className="text-sky-500" />
+                </div>
+                <div className="flex flex-col items-center gap-1" title="e-Reader / Book">
+                  <BookOpen size={22} className="text-blue-500" />
+                </div>
+                <div className="flex flex-col items-center gap-1" title="Smartphone">
+                  <Smartphone size={22} className="text-indigo-500" />
+                </div>
+                <div className="flex flex-col items-center gap-1" title="Printable">
+                  <Printer size={22} className="text-purple-500" />
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Right Column: Ebook Information & Checkout */}
+          {/* Right Column: Ebook Details & Checkout (Identical to User Reference Image) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="flex flex-wrap gap-2">
-              {ebook.tags.map((tag) => (
-                <Badge key={tag} variant="gold">
-                  {tag}
-                </Badge>
-              ))}
+            {/* Top Pill Badges (Digital Download, Worldwide Access) */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#2563eb] text-white shadow-xs">
+                Digital Download
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#0284c7] text-white shadow-xs">
+                Worldwide Access
+              </span>
             </div>
 
-            <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-[#1a1d20] tracking-tight leading-tight">
+            {/* Title */}
+            <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 tracking-tight leading-tight">
               {ebook.title}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-[var(--color-text-muted)] bg-[#FAF5E8] border border-[#c5a059]/30 p-3 rounded-xl">
-              <span className="flex items-center gap-1.5">
-                <BookOpen size={14} className="text-[#c5a059]" />
-                {ebook.pageCount} Pages
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <Clock size={14} className="text-[#c5a059]" />
-                {ebook.readingTime}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <FileText size={14} className="text-[#c5a059]" />
-                PDF Digital Book
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5 text-[#c5a059] font-bold">
-                <Sparkles size={14} />
-                Instant Download
-              </span>
+            {/* Price Display */}
+            <div className="font-heading text-3xl font-bold text-emerald-700">
+              {customPriceDisplay ||
+                (ebook.isPayWhatYouWant
+                  ? "Pay As You Want"
+                  : `$${(ebook.price / 100).toFixed(2)}`)}
             </div>
 
-            <p className="text-[var(--color-text-secondary)] leading-relaxed text-base font-normal">
+            {/* Description */}
+            <p className="text-slate-600 leading-relaxed text-base font-normal">
               {ebook.description}
             </p>
 
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#FFFDF8] to-[#FAF5E8] border border-[#c5a059]/40 space-y-4 shadow-sm">
+            <hr className="border-slate-200" />
+
+            {/* What's Included Section */}
+            <div className="space-y-3">
+              <h3 className="font-heading text-lg font-bold text-slate-900">
+                What&apos;s Included
+              </h3>
+              <ul className="space-y-2.5 text-sm font-medium text-slate-700">
+                <li className="flex items-center gap-2.5">
+                  <span className="p-0.5 rounded bg-emerald-500 text-white shrink-0">
+                    <CheckSquare size={16} />
+                  </span>
+                  <span>Instant PDF Download</span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="p-0.5 rounded bg-emerald-500 text-white shrink-0">
+                    <CheckSquare size={16} />
+                  </span>
+                  <span>Over {ebook.pageCount} Pages</span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="p-0.5 rounded bg-emerald-500 text-white shrink-0">
+                    <CheckSquare size={16} />
+                  </span>
+                  <span>Lifetime Access</span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="p-0.5 rounded bg-emerald-500 text-white shrink-0">
+                    <CheckSquare size={16} />
+                  </span>
+                  <span>Mobile & Tablet Friendly</span>
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <span className="p-0.5 rounded bg-emerald-500 text-white shrink-0">
+                    <CheckSquare size={16} />
+                  </span>
+                  <span>Printable Version Included</span>
+                </li>
+              </ul>
+            </div>
+
+            <hr className="border-slate-200" />
+
+            {/* Instant Download Banner (⚡ Lightning Box) */}
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-orange-50/60 border border-orange-100 text-slate-800">
+              <div className="p-2 rounded-lg bg-orange-500 text-white shrink-0 mt-0.5 shadow-xs">
+                <Zap size={18} />
+              </div>
+              <div className="space-y-0.5">
+                <h4 className="font-bold text-sm text-slate-900">
+                  Instant Download
+                </h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Access your eBook immediately after successful payment.
+                </p>
+              </div>
+            </div>
+
+            {/* Checkout & Purchase Box */}
+            <div className="space-y-5">
               {isOwned ? (
-                <div className="space-y-4">
+                <div className="p-6 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-4">
                   <div className="flex items-center justify-between">
-                    <Badge variant="gold" className="gap-1.5 px-3.5 py-1 text-xs font-bold">
-                      <Sparkles size={14} className="text-[#c5a059]" /> Purchased & Unlocked
-                    </Badge>
-                    <span className="text-xs font-bold text-[#15803d] bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                      Lifetime Access
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white flex items-center gap-1.5">
+                      <Sparkles size={14} /> Purchased & Unlocked
+                    </span>
+                    <span className="text-xs font-bold text-emerald-800">
+                      Lifetime Access ✓
                     </span>
                   </div>
-
-                  <p className="text-xs text-[var(--color-text-secondary)] font-normal">
-                    You own this eBook! Download your PDF copy or view your official purchase invoice below anytime.
+                  <p className="text-xs text-slate-700">
+                    You own this eBook! Download your copy below or access your purchase invoice anytime.
                   </p>
-
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+                  <div className="flex flex-wrap items-center gap-3">
                     <button
                       type="button"
                       onClick={async () => {
@@ -283,13 +349,10 @@ export default function EbookDetailView({
                         }
                       }}
                       disabled={isDownloading}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold bg-[#c5a059] text-white hover:bg-[#b38f38] transition-all shadow-md cursor-pointer disabled:opacity-50"
+                      className="px-5 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-md cursor-pointer disabled:opacity-50 inline-flex items-center gap-2"
                     >
                       {isDownloading ? (
-                        <span className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          Generating...
-                        </span>
+                        <span>Downloading...</span>
                       ) : (
                         <>
                           <Download size={16} />
@@ -302,60 +365,61 @@ export default function EbookDetailView({
                       href={`/api/invoices/${ebook.id}?uid=${user?.uid || "guest"}&format=html`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold border border-[#c5a059] text-[#1a1d20] bg-white hover:bg-[#FAF5E8] transition-colors shadow-xs"
+                      className="px-4 py-3 rounded-xl text-xs font-bold border border-slate-300 text-slate-800 bg-white hover:bg-slate-50 transition-colors inline-flex items-center gap-2 shadow-xs"
                     >
-                      <FileText size={15} className="text-[#c5a059]" />
+                      <FileText size={15} />
                       View Invoice
-                    </a>
-
-                    <a
-                      href={`/api/invoices/${ebook.id}?uid=${user?.uid || "guest"}&format=pdf`}
-                      download
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-bold border border-[#c5a059] text-[#1a1d20] bg-white hover:bg-[#FAF5E8] transition-colors shadow-xs"
-                    >
-                      <Download size={15} className="text-[#c5a059]" />
-                      Invoice PDF
                     </a>
                   </div>
                 </div>
               ) : (
-                <>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider font-semibold block">
-                        {ebook.isPayWhatYouWant
-                          ? "Pay As You Want"
-                          : "One-time Purchase"}
-                      </span>
-                      <span className="font-heading text-3xl sm:text-4xl font-bold text-[#1a1d20]">
-                        {customPriceDisplay ||
-                          (ebook.isPayWhatYouWant
-                            ? "Custom Amount"
-                            : `$${(ebook.price / 100).toFixed(2)}`)}
-                      </span>
-                    </div>
-                    <Badge variant="gold" className="gap-1 text-xs px-3 py-1">
-                      <Sparkles size={13} className="text-[#c5a059]" /> Instant PDF Download
-                    </Badge>
-                  </div>
-
-                  <div id="ebook-checkout-area" className="pt-2">
-                    {checkoutSlot}
-                  </div>
-
-                  <div className="pt-2 flex items-center justify-center gap-4 text-xs text-[var(--color-text-muted)] border-t border-[#c5a059]/20">
-                    <span className="flex items-center gap-1">
-                      <ShieldCheck size={14} className="text-[#c5a059]" /> Guaranteed Secure PayPal Checkout
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <Download size={14} className="text-[#c5a059]" /> Direct PDF Link
-                    </span>
-                  </div>
-                </>
+                <div id="ebook-checkout-area" className="space-y-4">
+                  {checkoutSlot}
+                </div>
               )}
+            </div>
+
+            {/* Secure Checkout Card */}
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 text-center space-y-3 shadow-xs">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-slate-800">
+                <Lock size={15} className="text-amber-600" />
+                <span>Secure Checkout</span>
+              </div>
+
+              {/* Payment Pill Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <span className="px-3 py-1 rounded-lg bg-[#0070ba] text-white text-xs font-bold shadow-xs">
+                  PayPal
+                </span>
+                <span className="px-3 py-1 rounded-lg bg-[#1a1f71] text-white text-xs font-bold shadow-xs">
+                  Visa
+                </span>
+                <span className="px-3 py-1 rounded-lg bg-[#eb001b] text-white text-xs font-bold shadow-xs">
+                  Mastercard
+                </span>
+                <span className="px-3 py-1 rounded-lg bg-emerald-700 text-white text-xs font-bold shadow-xs">
+                  SSL Secured
+                </span>
+              </div>
+
+              <p className="text-[11px] text-slate-500 font-normal leading-relaxed max-w-sm mx-auto">
+                Your payment information is securely processed using industry-standard encryption.
+              </p>
+            </div>
+
+            {/* 30-Day Money-Back Guarantee Banner */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#dcfce7]/70 border border-emerald-200 flex items-start gap-4 shadow-xs">
+              <div className="p-2.5 rounded-xl bg-blue-500 text-white shrink-0 mt-0.5 shadow-sm">
+                <Shield size={22} />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-heading text-base sm:text-lg font-bold text-slate-900">
+                  30-Day Money-Back Guarantee
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-700 font-normal leading-relaxed">
+                  If you&apos;re not completely satisfied, simply contact us within 30 days for a full refund.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -386,7 +450,7 @@ export default function EbookDetailView({
               <button
                 type="button"
                 onClick={() => setIsLightboxOpen(false)}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
                 aria-label="Close fullscreen preview"
               >
                 <X size={20} />
@@ -410,7 +474,7 @@ export default function EbookDetailView({
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 text-white hover:bg-[#c5a059] transition-all shadow-xl border border-white/20"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 text-white hover:bg-[#c5a059] transition-all shadow-xl border border-white/20 cursor-pointer"
                     aria-label="Previous image"
                   >
                     <ChevronLeft size={24} />
@@ -419,7 +483,7 @@ export default function EbookDetailView({
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 text-white hover:bg-[#c5a059] transition-all shadow-xl border border-white/20"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 text-white hover:bg-[#c5a059] transition-all shadow-xl border border-white/20 cursor-pointer"
                     aria-label="Next image"
                   >
                     <ChevronRight size={24} />

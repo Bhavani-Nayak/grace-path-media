@@ -38,6 +38,8 @@ export const metadata: Metadata = {
   },
 };
 
+import InspectBlocker from "@/components/security/InspectBlocker";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -49,7 +51,10 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${instrumentSerif.variable} ${barlow.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <InspectBlocker />
+        {children}
+      </body>
     </html>
   );
 }

@@ -1,9 +1,14 @@
+import { sanitizeErrorForUI, logTechnicalError } from "./error-utils";
+
 /**
- * Utility to map raw Firebase Auth error codes and technical error messages
- * into user-friendly, professional error messages without exposing "Firebase: Error (...)" strings.
+ * Utility to map raw authentication error codes and technical error messages
+ * into user-friendly, professional error messages without exposing technical details.
  */
 export function formatAuthError(err: unknown): string {
   if (!err) return "An unexpected error occurred. Please try again.";
+
+  // Always log raw error to console for debugging
+  logTechnicalError(err);
 
   let code = "";
   let message = "";
@@ -70,15 +75,5 @@ export function formatAuthError(err: unknown): string {
     return "This sign-in method is currently disabled. Please contact support.";
   }
 
-  // Generic fallback if message contains "Firebase:" prefix
-  if (message.startsWith("Firebase:")) {
-    const match = message.match(/\(([^)]+)\)/);
-    if (match && match[1]) {
-      const parsedCode = match[1].replace("auth/", "").replace(/-/g, " ");
-      return `Authentication failed (${parsedCode}). Please try again.`;
-    }
-    return "Authentication failed. Please check your details and try again.";
-  }
-
-  return message || "An unexpected error occurred. Please try again.";
+  return sanitizeErrorForUI(err, "Authentication failed. Please check your details and try again.");
 }

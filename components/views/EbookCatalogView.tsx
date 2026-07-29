@@ -8,6 +8,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import Image from "next/image";
 import { Sparkles, BookOpen, Clock } from "lucide-react";
+import TrustBadges from "@/components/ui/TrustBadges";
 import type { Ebook } from "@/models/ebook";
 
 interface EbookCatalogViewProps {
@@ -25,17 +26,21 @@ export default function EbookCatalogView({
   return (
     <PageWrapper>
       <div className="max-w-6xl mx-auto px-6 py-20 space-y-12">
-        <div className="space-y-3 max-w-2xl">
-          <Badge variant="gold" className="gap-1.5">
-            <Sparkles size={14} className="text-[#c5a059]" />
-            Digital Faith Publications
-          </Badge>
-          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold text-[#1a1d20] tracking-tight">
-            Ebooks & Publications
-          </h1>
-          <p className="text-[var(--color-text-secondary)] text-base sm:text-lg font-normal leading-relaxed">
-            Scripture-centered publications and devotionals — own them outright with instant PDF download access.
-          </p>
+        <div className="space-y-6">
+          <div className="space-y-3 max-w-2xl">
+            <Badge variant="gold" className="gap-1.5">
+              <Sparkles size={14} className="text-[#c5a059]" />
+              Digital Faith Publications
+            </Badge>
+            <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold text-[#1a1d20] tracking-tight">
+              Ebooks & Publications
+            </h1>
+            <p className="text-[var(--color-text-secondary)] text-base sm:text-lg font-normal leading-relaxed">
+              Scripture-centered publications and devotionals — own them outright with instant PDF download access.
+            </p>
+          </div>
+
+          <TrustBadges variant="horizontal" />
         </div>
 
         {isLoading && <LoadingSpinner className="py-20" />}

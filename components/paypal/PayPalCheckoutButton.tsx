@@ -8,6 +8,8 @@ import Button from "@/components/ui/Button";
 import { LogIn, ShoppingBag, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { sanitizeErrorForUI, logTechnicalError } from "@/lib/error-utils";
+
 interface PayPalCheckoutButtonProps {
   productId: string;
   productSlug: string;
@@ -52,13 +54,14 @@ export default function PayPalCheckoutButton({
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "Failed to create PayPal order");
+        throw new Error(err.error || "Failed to create order");
       }
 
       const data = await res.json();
       return data.orderId;
     } catch (err: any) {
-      setErrorMessage(err.message || "Failed to initiate payment");
+      logTechnicalError(err);
+      setErrorMessage(sanitizeErrorForUI(err, "Payment creation failed. Please try again."));
       throw err;
     }
   };
@@ -92,7 +95,8 @@ export default function PayPalCheckoutButton({
       }
     } catch (err: any) {
       setIsProcessing(false);
-      setErrorMessage(err.message || "Payment processing failed.");
+      logTechnicalError(err);
+      setErrorMessage(sanitizeErrorForUI(err, "Payment processing failed. Please try again."));
     }
   };
 
@@ -108,7 +112,7 @@ export default function PayPalCheckoutButton({
         <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-xl space-y-3 text-left">
           <div className="flex items-center gap-2 text-amber-900 font-bold text-xs uppercase tracking-wider">
             <ShieldCheck size={16} className="text-[#c5a059]" />
-            Firebase Sign-In Required for eBook Ownership
+            Account Sign-In Required for eBook Ownership
           </div>
           <p className="text-xs text-amber-800 leading-relaxed">
             Please sign in with Google so your purchase and invoice can be securely linked to your account.
